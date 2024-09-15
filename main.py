@@ -122,11 +122,11 @@ def combine_data(aqi_data, weather_data):
 def save_to_csv(data, filename):
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        # Write header
+        
         header = ['Location', 'Status (AQI)', 'AQI (USA)', 'AQI (India)', 'PM2.5', 'PM10', 'NO2',
                   'Status (Weather)', 'Temp', 'Wind', 'Pressure', 'Humidity', 'Latitude', 'Longitude']
         writer.writerow(header)
-        # Write data
+       
         for location, values in data.items():
             row = [
                 location,
@@ -196,11 +196,11 @@ def send_to_thingsboard(csv_file, thingsboard_url, provision_device_key, provisi
         for row in csv_reader:
             device_name = f"AQI_Weather_{row['Location'].replace(' ', '_')}"
 
-            # Provision the device and get its access token
+            
             access_token = provision_device(thingsboard_url, provision_device_key, provision_device_secret, device_name, keys_file)
 
             if access_token:
-                # Prepare the data payload with error handling
+
                 try:
                     telemetry = {
                         'Status_AQI': row['Status (AQI)'],
@@ -217,11 +217,9 @@ def send_to_thingsboard(csv_file, thingsboard_url, provision_device_key, provisi
                         'Latitude': float(row['Latitude']) if row['Latitude'] and row['Latitude'] != 'N/A' else None,
                         'Longitude': float(row['Longitude']) if row['Longitude'] and row['Longitude'] != 'N/A' else None
                     }
-
-                    # Remove None values
+                    
                     telemetry = {k: v for k, v in telemetry.items() if v is not None}
 
-                    # Send the data to ThingsBoard
                     if send_telemetry(thingsboard_url, access_token, telemetry):
                         print(f"Data sent successfully for {row['Location']}")
                     else:
@@ -251,10 +249,10 @@ def save_location_temp_csv(data, filename):
             writer.writerow([current_time, location, temp])
 
 if __name__ == "__main__":
-    api_key = "AIzaSyAnPkjF1aa_Rh3z5YYw-4o51kDtB8vPEgc"  # Replace with your actual API key
+    api_key = "GOOGLE API KEY" 
     thingsboard_url = "https://thingsboard.cloud/"  # e.g., "http://localhost:8080" or your cloud instance URL
-    provision_device_key = "41punkzee1e49e7hs7qm"
-    provision_device_secret = "gjp3kw639d6ncpakzzln"
+    provision_device_key = "THINGSBOARD PROVISION KEY"
+    provision_device_secret = "THINGSBOARD PROVISION SECRET"
     keys_file = 'keys.txt'
 
     aqi_data = scrape_aqi_data()
@@ -265,7 +263,6 @@ if __name__ == "__main__":
     save_to_csv(combined_data_with_coords, 'combined_aqi_weather_data.csv')
     save_location_temp_csv(combined_data_with_coords, 'location_temperature_data.csv')
 
-    # Send data to ThingsBoard
     send_to_thingsboard('combined_aqi_weather_data.csv', thingsboard_url, provision_device_key, provision_device_secret, keys_file)
 
 
